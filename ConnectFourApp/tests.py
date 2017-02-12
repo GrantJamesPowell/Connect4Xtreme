@@ -1,7 +1,61 @@
 from django.test import TestCase
 from .models import GameBoard, Game
+from .alphaconnectfour import ai_simple_move
+
+import random
 
 # Create your tests here.
+
+class AlphaConnectFourSimpleAiTests(TestCase):
+
+    def test_simple_take_win_if_available(self):
+        board = GameBoard()
+        player = 1
+        for _ in range(3):
+            board.make_move(player, 0)
+        move = ai_simple_move(board, player)
+        self.assertTrue(move == 0)
+
+    def test_simple_block_if_other_player_can_win(self):
+        board = GameBoard()
+        player = 1
+        other_player = 2
+        for _ in range(3):
+            board.make_move(player,0)
+        move = ai_simple_move(board, other_player)
+        self.assertTrue(move == 0)
+
+    def test_generate_100_moves_and_make_sure_they_are_valid_for_no_winner_not_full_board(self):
+        for _ in range(100):
+            board = GameBoard()
+            for _ in range(3):
+                board.make_move(1, random.randint(0, board.width - 1))
+                board.make_move(2, random.randint(0, board.width - 1))
+            move = ai_simple_move(board, 1)
+            self.assertTrue(move in board.available_moves)
+
+            error = board.make_move(1, move)
+            self.assertEqual(error, None)
+
+    def test_ai_play_against_itself_100_times(self):
+        for _ in range(100):
+            board = GameBoard()
+            turn = 0
+            players = (1,2)
+            while not board.winner and not board.stalemate:
+                move = ai_simple_move(board, players[turn])
+                if move is not None:
+                    board.make_move(players[turn], move)
+                    turn = not turn
+
+
+        print()
+        print('Simple Ai Game Example')
+        for row in board.get_game_board(): print(row)
+        print()
+
+
+
 
 
 class GameBoardTests(TestCase):

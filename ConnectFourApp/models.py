@@ -24,6 +24,11 @@ class GameBoard(models.Model):
     # if you increase the game board, you would need a larger max_length of game_data
     winner = models.IntegerField(default=0)
 
+    #static Properties
+    width = width
+    depth = depth
+    needed_to_win = needed_to_win
+
     def get_game_board(self):
         return json.loads(self.game_data)
 
@@ -47,6 +52,12 @@ class GameBoard(models.Model):
         no_winner = self.winner == 0
         no_moves_remaining = all(board[0])  # no 0s in the top row
         return no_winner and no_moves_remaining
+
+    @property
+    def available_moves(self):
+        board = self.get_game_board()
+        toprow = board[0]
+        return [i for i in range(width) if toprow[i] == 0]  # return a list of the indexes that are empty
 
     @staticmethod
     def find_winner(board):
