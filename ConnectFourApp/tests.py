@@ -69,8 +69,31 @@ class GameBoardTests(TestCase):
             board.make_move(1, move)
         self.assertEqual(board.winner, 1)
 
-    def test_winning_moves(self):
-        pass
+    def test_winning_moves_horizontal(self):
+        board = GameBoard()
+        moves = (0,1,2)
+        for move in moves:
+            board.make_move(1, move)
+        winning_moves = board.get_winning_moves(1)
+        self.assertTrue(3 in winning_moves)
 
+    def test_winning_moves_vertical(self):
+        board = GameBoard()
+        moves = (0,0,0)
+        for move in moves:
+            board.make_move(1, move)
+        winning_moves = board.get_winning_moves(1)
+        self.assertTrue(0 in winning_moves)
+
+    def test_winning_moves_diagonal(self):
+        board =GameBoard()
+        p2moves = (0,0,0,1,1,2)  # make a little triangle to put the winning diagonal on
+        p1moves = (0,1,2)
+        for move in p2moves:
+            board.make_move(2, move)
+        for move in p1moves:
+            board.make_move(1, move)
+        winning_moves = board.get_winning_moves(2)
+        self.assertTrue(3 in winning_moves)
 
 

@@ -106,7 +106,16 @@ class GameBoard(models.Model):
         return 0
 
     def get_winning_moves(self, player):
-        return 0
+        winning_moves = []
+        # try all the moves in a width
+        for move in range(width):
+            # make a "testboard" based on the current board
+            testboard = GameBoard()
+            testboard.game_data = self.game_data
+            testboard.make_move(player, move)
+            if testboard.winner == player:
+                winning_moves.append(move)
+        return winning_moves
 
 
 class Game(models.Model):
