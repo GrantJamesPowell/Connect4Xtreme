@@ -133,3 +133,12 @@ class Game(models.Model):
     user = models.ForeignKey(User)
     isusersturn = models.BooleanField(default=0)  # 0 if computer's turn 1 is user's turn
     gameboard = models.OneToOneField(GameBoard)
+
+    @property
+    def status(self):
+        if self.gameboard.winner:
+            return ['Lost', 'Won'][self.gameboard.winner == 1]
+        if self.gameboard.stalemate:
+            return 'Stalemate'
+        else:
+            return 'Your Move'

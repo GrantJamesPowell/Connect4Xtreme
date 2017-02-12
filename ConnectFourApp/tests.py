@@ -6,6 +6,7 @@ import random
 
 # Create your tests here.
 
+
 class AlphaConnectFourSimpleAiTests(TestCase):
 
     def test_simple_take_win_if_available(self):
@@ -25,7 +26,7 @@ class AlphaConnectFourSimpleAiTests(TestCase):
         move = ai_simple_move(board, other_player)
         self.assertTrue(move == 0)
 
-    def test_generate_100_moves_and_make_sure_they_are_valid_for_no_winner_not_full_board(self):
+    def test_generate_100_moves_and_make_sure_they_are_valid_for_no_winner_yet_not_full_board(self):
         for _ in range(100):
             board = GameBoard()
             for _ in range(3):
@@ -37,7 +38,7 @@ class AlphaConnectFourSimpleAiTests(TestCase):
             error = board.make_move(1, move)
             self.assertEqual(error, None)
 
-    def test_ai_play_against_itself_100_times(self):
+    def test_simple_ai_play_against_itself_100_times(self):
         for _ in range(100):
             board = GameBoard()
             turn = 0
@@ -53,9 +54,6 @@ class AlphaConnectFourSimpleAiTests(TestCase):
         print('Simple Ai Game Example')
         for row in board.get_game_board(): print(row)
         print()
-
-
-
 
 
 class GameBoardTests(TestCase):
@@ -95,7 +93,7 @@ class GameBoardTests(TestCase):
             board.make_move(player, move)
         self.assertEqual(player, board.winner)
 
-    def test_veritical_victory(self):
+    def test_vertical_victory(self):
         board = GameBoard()
         player = 1
         moves = (0,0,0,0)
