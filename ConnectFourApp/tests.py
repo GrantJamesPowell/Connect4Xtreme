@@ -69,5 +69,8 @@ class GameBoardTests(TestCase):
             board.make_move(1, move)
         self.assertEqual(board.winner, 1)
 
+    def test_winning_moves(self):
+        pass
+
 
 

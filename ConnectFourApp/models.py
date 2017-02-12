@@ -45,7 +45,7 @@ class GameBoard(models.Model):
     def stalemate(self):
         board = self.get_game_board()
         no_winner = self.winner == 0
-        no_moves_remaining = all(board[0])
+        no_moves_remaining = all(board[0])  # no 0s in the top row
         return no_winner and no_moves_remaining
 
     @staticmethod
@@ -60,10 +60,11 @@ class GameBoard(models.Model):
                 # beacuse there is an empty spot, this is to take care of the case where all 4 of positions
                 # we are checking are the same but empty
                 if board[pos][col] != 0:
-                    # this looks a little tricky but isn't. the hash set adds values to itself
-                    # for every unique value, if at the end there was only one unique value, that means that all the
-                    # elements were the same value, which would signify that there was a winner
-                    uniquevals = set(board[i][col] for i in range(pos, pos + needed_to_win))
+                    # The hash set adds values to itself for every unique value, if at the end there was only one
+                    # unique value, that means that all the elements were the same, which
+                    # means that there was a winner
+                    group = [board[i][col] for i in range(pos, pos + needed_to_win)]
+                    uniquevals = set(group)
                     if len(uniquevals) == 1:
                         # return the unique element which is equal to the player number
                         return board[pos][col]
@@ -73,7 +74,7 @@ class GameBoard(models.Model):
             # iterate through the row for every start position with enough length remaining to have a winner.
             # For a 7 width game we would only need to look at positions 0,1,2,3 because position 4 would only
             # have 3 slots left in the row, so it couldn't have a connect 4
-            for pos in range(width - needed_to_win):
+            for pos in range(width + 1 - needed_to_win):
                 # check to make sure that the first spot isn't empty, if they were all the same but empty, we wouldn't
                 # have a want to return 0 as the winner
                 if row[pos] != 0:
@@ -82,13 +83,29 @@ class GameBoard(models.Model):
                         # return the first entry, equal to the player number
                         return row[pos]
 
-        # check right diagonals for a winner
+        # check right diagonals for a winner (diagonal where the lowest piece is the farthest right)
+        for row in range(depth + 1 - needed_to_win):
+            for col in range(width + 1 - needed_to_win):
+                if board[row][col] != 0:  # check to make sure the first value isn't empty
+                    group = [board[row + offset][col + offset] for offset in range(needed_to_win)]  # iterate diagonally
+                    uniquevals = set(group)
+                    if len(uniquevals) == 1:  # there was only one unique value in the group
+                        return board[row][col]  # return the unique value
 
 
-        # check left diagonals for a winner
-
+        # check left diagonals for a winner (diagonal where the lowest piece is the farthest left)
+        for row in range(depth + 1 - needed_to_win):
+            for col in range(width - 1, needed_to_win - 2, -1):
+                if board[row][col] != 0:
+                    group = [board[row + offset][col - offset] for offset in range(needed_to_win)]
+                    uniquevals = set(group)
+                    if len(uniquevals) == 1:
+                        return board[row][col]
 
         # no winner was found
+        return 0
+
+    def get_winning_moves(self, player):
         return 0
 
 
