@@ -61,13 +61,24 @@ class GameBoardTests(TestCase):
     def test_invalid_move(self):
         board = GameBoard()
         moves = (0,0,0,0,0,0)  # Fill a Column
-        player = 1
+        turn = 1
+        players = (1,2)
         for move in moves:
-            error = board.make_move(player, move)
+            error = board.make_move(players[turn], move)
+            turn = not turn
             self.assertEqual(error, None)  # assert there is no error
         move = 0  # add one to a filled row
-        error = board.make_move(player, move)
+        error = board.make_move(players[turn], move)
         self.assertEqual(error, 1)
+
+    def test_make_move_on_finished_game(self):
+        board = GameBoard()
+        moves = (0,0,0,0)  # Win a game
+        player = 1
+        for move in moves:
+            board.make_move(player, move)
+        err = board.make_move(player, 0)
+        self.assertTrue(err)
 
     def test_stalemate(self):
         board = GameBoard()

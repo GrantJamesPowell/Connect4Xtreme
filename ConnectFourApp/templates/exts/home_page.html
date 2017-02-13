@@ -3,6 +3,7 @@
 
 <ol>
 {% for game in object_list %}
-<li>{{ game }}</li>
+<li><a href="{% url 'gamedatapk' gamenum=game.id %}">{{ game }}</a></li>
 {% endfor %}
 </ol>
+<a href="{% url 'gamedata' %}">New game</a>

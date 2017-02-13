@@ -36,6 +36,9 @@ class GameBoard(models.Model):
         self.game_data = json.dumps(board)
 
     def make_move(self, player, slot):
+        # error if the game is over
+        if self.winner:
+            return 1
         board = self.get_game_board()
         if board[0][slot]:  # This means that that slot was full, so this is an error
             return 1  # Error
@@ -133,6 +136,7 @@ class Game(models.Model):
     user = models.ForeignKey(User)
     isusersturn = models.BooleanField(default=0)  # 0 if computer's turn 1 is user's turn
     gameboard = models.OneToOneField(GameBoard)
+    starttime = models.DateField(auto_now=True)
 
     @property
     def status(self):
@@ -142,3 +146,6 @@ class Game(models.Model):
             return 'Stalemate'
         else:
             return 'Your Move'
+
+    def __str__(self):
+        return 'Game Started on {} ({})'.format(self.starttime, self.status)

@@ -1,30 +1,103 @@
 # Django View Functions
-from django.shortcuts import render
+from django.shortcuts import render, HttpResponse, HttpResponseRedirect
+from django.http import JsonResponse
 from django.views.generic import TemplateView, ListView, RedirectView, FormView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.utils.http import is_safe_url
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import REDIRECT_FIELD_NAME, login as auth_login, logout as auth_logout
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.core.context_processors import csrf
 
-# Models
+# models
 from django.contrib.auth.models import User
 from .models import Game, GameBoard
 
 # forms
 from django import forms
+from .forms import MakeMoveForm
+
+# Alpha Connect 4
+from .alphaconnectfour import ai_simple_move
+
+# other imports
+import json
 
 # Game Views
 
 class HomePage(ListView):
     model = Game
+    template_name = 'exts/home_page.html'
 
 
 class GameView(TemplateView):
     pass
 
 
+# Ajax Views
+
+@login_required(login_url='/login')
+def gamedata(request, gamenum=-1):
+    response_data = dict()
+    player = 1
+    cpu_player = 2
+
+    if request.method == 'GET':
+        # get the object from the database or make a new one
+        gameobj = Game.objects.filter(pk=gamenum, user=request.user).first() or make_new_game_object(request.user)
+        response_data['cpu_move'] = -1
+
+    if request.method == 'POST':
+
+        # get and validate the csrf token and post values
+        form = MakeMoveForm(request.POST)
+        if not form.is_valid():
+            return JsonResponse({'status': 'error', 'error_msg': 'form invalid'})
+        move = form.cleaned_data['move']
+        game = form.cleaned_data['game']
+
+        # get the game object from the database
+        gameobj = Game.objects.filter(pk=game, user=request.user).first()
+        if not gameobj:
+            return JsonResponse({'status': 'error', 'error_msg': 'object not found'})
+
+        # add player move to the object
+        errcode = gameobj.gameboard.make_move(player, move)
+        if errcode:
+            return JsonResponse({'status': 'error', 'error_msg': 'invalid player move'})
+
+        # add cpu move to the object
+        cpu_move = ai_simple_move(gameobj.gameboard, cpu_player)
+        if cpu_move:
+            gameobj.gameboard.make_move(cpu_player, cpu_move)
+
+        # save the object to the database
+        gameobj.gameboard.save()
+        gameobj.save()
+
+        # add the cpu_move to the rsponse and along with the status
+        response_data['status'] = 'success'
+        response_data['cpu_move'] = cpu_move or -1
+
+    # add a form to be sent back with TODO: I feel like ajax makes this unnessacry
+    response_data['form'] = MakeMoveForm(initial={'game': gameobj.id}).as_p()
+    # add game data to the response
+    response_data['game'] = gameobj.id
+    response_data['gameboard'] = gameobj.gameboard.game_data
+    response_data['winner'] = gameobj.gameboard.winner
+    response_data['stalemate'] = gameobj.gameboard.stalemate
+    # add a csrf token to prevent against csrf
+    response_data['csrf_token'] = str(csrf(request)['csrf_token'])
+
+    return JsonResponse(response_data)
+
+
+
+
 # Account Management Views
+
 
 class UserCreate(CreateView):
     model = User
@@ -59,3 +132,15 @@ class LogoutView(RedirectView):
     def get(self, request, *args, **kwargs):
         auth_logout(request)
         return super(LogoutView, self).get(request, *args, **kwargs)
+
+
+# helper functions
+
+def make_new_game_object(user):
+    # Django is kinda weird about one to one relationships
+    game_board = GameBoard()
+    game_board.save()
+    game = Game(user=user, gameboard=game_board)
+    game.save()
+    return game
+
