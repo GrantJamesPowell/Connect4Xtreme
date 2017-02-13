@@ -6,6 +6,10 @@ import random
 
 # Create your tests here.
 
+class AjaxViewsTest(TestCase):
+    pass
+
+
 
 class AlphaConnectFourSimpleAiTests(TestCase):
 

@@ -1,6 +1,15 @@
+{% extends 'bases/base.html' %}
+
+{% block headerwords %}
+    <h3>Login</h3>
+{% endblock %}
+
+{% block boxblock %}
 <form action="" method="post">{% csrf_token %}
     {{ form.as_p }}
     <input type="submit" value="Login" />
+
+    <a href="{% url 'accountcreate' %}" class="button alt" style="float: right">Create Account</a>
+    <p style="float: right; padding-right: 5px">(Don't Have an Account? For the Low Low Price of... Jk)</p>
 </form>
-<br />
-<a href="{% url 'accountcreate' %}">Create Account</a>
+{% endblock %}

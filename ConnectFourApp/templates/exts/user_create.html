@@ -1,5 +1,16 @@
+{% extends 'bases/base.html' %}
+
+{% block headerwords %}
+    <h3>Account Create</h3>
+{% endblock %}
+
+{% block boxblock %}
+
 <form action="" method="post">{% csrf_token %}
     {{ form.as_p }}
-    <input type="submit" value="Save" />
+    <input type="submit" value="Create" />
+    <a href="{% url 'login' %}" class="button alt" style="float: right">Login</a>
+    <p style="float: right; padding-right: 5px">(Already a Connect 4 X-treme User?)</p>
 </form>
-<a href="{% url 'login' %}">Login</a>
+
+{% endblock %}

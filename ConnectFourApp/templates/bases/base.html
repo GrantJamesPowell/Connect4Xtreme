@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<!--
+	Alpha by HTML5 UP
+	html5up.net | @n33co
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+{% load staticfiles %}
+<html>
+	<head>
+		<title>Connect4 X-treme</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
+	</head>
+	<body>
+		<div id="page-wrapper">
+
+			<!-- Header -->
+			<header id="header">
+				<nav id="nav">
+                    <ul>
+                        {% if request.user.is_authenticated %}
+                        <li>Hi, {{ request.user }}!</li>
+                            <li><a href="{% url 'logout' %}">Logout</a></li>
+                        {% endif %}
+                    </ul>
+				</nav>
+			</header>
+
+			<!-- Main -->
+				<section id="main" class="container">
+					<header>
+                        {% block headerwords %}
+                        {% endblock %}
+					</header>
+                {% if not nobox %}
+					<div class="row">
+						<div class="12u">
+                            <section class="box">
+                                    {% block boxblock %}
+                                    {% endblock %}
+							</section>
+						</div>
+					</div>
+                {% endif %}
+				</section>
+
+			<!-- Footer -->
+				<footer id="footer">
+					<ul class="copyright">
+						<li>&copy; Grant Powell - <a href="https://github.com/GrantJamesPowell/Connect4Xtreme">Code</a></li>
+                        <li><a href="http://html5up.net/alpha">HTML 5 UP - Alpha</a></li>
+					</ul>
+				</footer>
+
+		</div>
+
+
+	</body>
+<script>
+    console.log('hi')
+</script>
+</html>

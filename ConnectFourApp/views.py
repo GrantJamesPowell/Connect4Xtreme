@@ -6,10 +6,11 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.utils.http import is_safe_url
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import REDIRECT_FIELD_NAME, login as auth_login, logout as auth_logout
+from django.contrib.auth import REDIRECT_FIELD_NAME, login as auth_login, logout as auth_logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.context_processors import csrf
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # models
 from django.contrib.auth.models import User
@@ -27,18 +28,25 @@ import json
 
 # Game Views
 
-class HomePage(ListView):
-    model = Game
+class HomePage(LoginRequiredMixin, ListView):
     template_name = 'exts/home_page.html'
+    login_url = '/login/'
+    def get_queryset(self):
+        return Game.objects.filter(user=self.request.user).all()
 
 
-class GameView(TemplateView):
-    pass
+def gameview(request, game_pk):
+    ctext = dict()
+    ctext['game'] = Game.objects.filter(user=request.user, pk=game_pk).first()
+
+    if not ctext['game']:
+        pass
 
 
 # Ajax Views
 
-@login_required(login_url='/login')
+
+@login_required(login_url='/login/')
 def gamedata(request, gamenum=-1):
     response_data = dict()
     player = 1
@@ -77,12 +85,10 @@ def gamedata(request, gamenum=-1):
         gameobj.gameboard.save()
         gameobj.save()
 
-        # add the cpu_move to the rsponse and along with the status
+        # add the cpu_move to the response and along with the status
         response_data['status'] = 'success'
         response_data['cpu_move'] = cpu_move or -1
 
-    # add a form to be sent back with TODO: I feel like ajax makes this unnessacry
-    response_data['form'] = MakeMoveForm(initial={'game': gameobj.id}).as_p()
     # add game data to the response
     response_data['game'] = gameobj.id
     response_data['gameboard'] = gameobj.gameboard.game_data
@@ -94,8 +100,6 @@ def gamedata(request, gamenum=-1):
     return JsonResponse(response_data)
 
 
-
-
 # Account Management Views
 
 
@@ -103,6 +107,13 @@ class UserCreate(CreateView):
     model = User
     fields = ('username', 'first_name', 'last_name', 'password')
     template_name = 'exts/user_create.html'
+
+    def get_success_url(self):
+        # login the person
+        self.object.backend = 'django.contrib.auth.backends.ModelBackend'
+        auth_login(self.request, self.object)
+        # now return the success url
+        return '/'
 
     def get_form(self, form_class=None):
         form = super(CreateView, self).get_form(form_class)
@@ -127,7 +138,7 @@ class LoginView(FormView):
 
 
 class LogoutView(RedirectView):
-    url = '/login'
+    url = '/login/'
 
     def get(self, request, *args, **kwargs):
         auth_logout(request)
@@ -143,4 +154,5 @@ def make_new_game_object(user):
     game = Game(user=user, gameboard=game_board)
     game.save()
     return game
+
 

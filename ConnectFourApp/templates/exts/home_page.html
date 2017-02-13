@@ -1,9 +1,14 @@
-<h3>My Games</h3>
+{% extends 'bases/base.html' %}
+{% block headerwords %}
+    <h3>My Games</h3>
+{% endblock %}
 
+{% block boxblock %}
+    <ol>
+        {% for game in object_list %}
+        <li><a href="{% url 'gamedatapk' gamenum=game.id %}">{{ game }}</a></li>
+        {% endfor %}
+    </ol>
 
-<ol>
-{% for game in object_list %}
-<li><a href="{% url 'gamedatapk' gamenum=game.id %}">{{ game }}</a></li>
-{% endfor %}
-</ol>
-<a href="{% url 'gamedata' %}">New game</a>
+    <a href="{% url 'gamedata' %}">New game</a>
+{% endblock %}
