@@ -9,6 +9,8 @@ urlpatterns = [  # Mostly User Facing Stuff, Like account create and index
     url('^createaccount$', views.UserCreate.as_view(), name='accountcreate'),
     url(r'^login/', views.LoginView.as_view(), name='login'),
     url(r'^logout$', views.LogoutView.as_view(), name='logout'),
+    url(r'^gameview$', views.gameview, name='gameview'),
+    url(r'^gameview/(?P<game_pk>[0-9]+)', views.gameview, name='gameviewpk'),
 ] + [  # The Game Ajax Functions
     url(r'^gamedata$', views.gamedata, name='gamedata'),
     url(r'^gamedata/(?P<gamenum>[0-9]+)', views.gamedata, name='gamedatapk'),

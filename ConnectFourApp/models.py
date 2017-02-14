@@ -50,6 +50,10 @@ class GameBoard(models.Model):
         self.winner = self.find_winner(board)  # set the winner if there is one
 
     @property
+    def moves_so_far(self):
+        return sum(sum([bool(i) for i in row]) for row in self.get_game_board())
+
+    @property
     def stalemate(self):
         board = self.get_game_board()
         no_winner = self.winner == 0
@@ -149,3 +153,4 @@ class Game(models.Model):
 
     def __str__(self):
         return 'Game Started on {} ({})'.format(self.starttime, self.status)
+

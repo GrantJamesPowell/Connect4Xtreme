@@ -6,9 +6,9 @@
 {% block boxblock %}
     <ol>
         {% for game in object_list %}
-        <li><a href="{% url 'gamedatapk' gamenum=game.id %}">{{ game }}</a></li>
+        <li><a href="{% url 'gameviewpk' game_pk=game.id %}">{{ game }}</a></li>
         {% endfor %}
     </ol>
 
-    <a href="{% url 'gamedata' %}">New game</a>
+    <a href="{% url 'gameview' %}">New game</a>
 {% endblock %}

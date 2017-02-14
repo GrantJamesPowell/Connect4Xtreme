@@ -1,9 +1,135 @@
 {% extends 'bases/base.html' %}
 
 {% block headerwords%}
-    {{ game }}
+    <h3 id="gamestr">{{ game }}</h3>
+    <p id="winstats"></p>
+    <div id="game-base">
+        <div id="game-table">
+        </div>
+    </div>
 {% endblock %}
 
 
 {% block boxblock %}
+    <p id="moves_so_far"></p>
 {% endblock %}
+
+{% block scriptblock %}
+    <script>
+
+    var game, csrf_token, gameboardjson, gameboard, winner, cpu_move, stalemate, gamestr, moves_so_far;
+    var initaldata;
+    var id = 1;
+    var board = document.getElementById("game-table");
+    var difficulty = 1
+    board.innerHTML += '<div id="dhuman' + '" class="disc ' + 'red' + '" style=""' + '></div>';
+
+
+
+    $(document).ready(function(){
+        $.get('/gamedata/{{ game.id }}', function(data){setvals(data)}); // set this to game value
+    });
+
+    function setvals(data){
+        if (data.status == 'error'){
+            return
+        }
+
+        game = data.game;
+        gamestr = data.gamestr;
+        document.getElementById("gamestr").innerHTML = gamestr;
+        csrf_token = data.csrf_token;
+        gameboardjson = data.gameboard;
+        gameboard = JSON.parse(gameboardjson);
+        winner = data.winner;
+        document.getElementById("winstats").innerHTML = ['Your Turn', 'You Won!', 'You Lost'][winner] ;
+        cpu_move = data.cpu_move;
+        stalemate = data.stalemate;
+        moves_so_far = data.moves_so_far;
+        document.getElementById("moves_so_far").innerHTML = 'Moves so far: ' + moves_so_far;
+
+        render_game_board(gameboard);
+    }
+
+
+    function render_game_board(gameboard){
+        // Take the existing game board and put it on the field
+        console.log('Rendering Game Board');
+        board.innerHTML = ""
+        if (!winner) {
+            board.innerHTML += '<div id="dhuman' + '" class="disc ' + 'red' + '" style=""' + '></div>';
+        }
+        for (row=5; row >= 0; row-- ) {
+            for (col=6; col >= 0; col--) {
+                player = this.gameboard[row][col];
+                if (player){
+                    console.log('adding row' + row + ' col ' + col + ' for ' + player);
+                    piece = make_game_piece_div(player, row, col);
+                    console.log(piece)
+                }
+            }
+        }
+    };
+
+    function make_game_piece_div(player, row, col){
+        var color = player == 1 ? 'red' : 'yellow';
+        var newpeice= '<div id="d' + id + '" class="disc ' + color + '" style=""' + '></div>';
+        board.innerHTML += newpeice;
+         document.getElementById('d'+id).style.top = (14+row*60)+'px';
+         document.getElementById('d'+id).style.left = (14+60*col)+"px";
+        id += 1;
+    };
+
+    document.onmousemove = function(evt){
+        if (!winner) {
+            currentCol = Math.floor((evt.clientX - board.offsetLeft)/60);
+            if(currentCol<0){currentCol=0;}
+            if(currentCol>6){currentCol=6;}
+            document.getElementById('dhuman').style.left = (14+60*currentCol)+"px";
+            document.getElementById('dhuman').style.top = "-55px";
+        } else {
+            if (document.contains(document.getElementById("dhuman"))) {
+            document.getElementById("dhuman").remove();}
+        }
+  };
+
+
+    function post_player_move(col){
+        // dont send the request if there is already a winner
+        if (winner) {
+            return
+        }
+        // take player move and send it to the server
+        data = {};
+        data.csrfmiddlewaretoken = csrf_token;
+        data.move = col;
+        data.game = game;
+        data.difficulty = difficulty;
+        $.post('/gamedata',data, function(data){setvals(data)})
+    }
+
+    function parse_post_response(data) {
+
+    }
+
+    function possibleColumns(){
+      var moves_array = new Array();
+      for(var i=0; i<7; i++){
+            if(gameboard[0][i] == 0){
+                  moves_array.push(i);
+            }
+      }
+      return moves_array;
+    }
+
+    document.onclick = function(evt){
+      if(possibleColumns().indexOf(currentCol) != -1){
+          post_player_move(currentCol)
+        console.log('player dropped at' + currentCol);
+      }
+    };
+
+    </script>
+        {% endblock %}
+
+

@@ -34,13 +34,16 @@ class HomePage(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return Game.objects.filter(user=self.request.user).all()
 
-
-def gameview(request, game_pk):
+@login_required(login_url='/login/')
+def gameview(request, game_pk=-1):
     ctext = dict()
     ctext['game'] = Game.objects.filter(user=request.user, pk=game_pk).first()
 
     if not ctext['game']:
-        pass
+        game = make_new_game_object(request.user)
+        return HttpResponseRedirect('/gameview/{}'.format(game.id))
+
+    return render(request, 'exts/game_view.html', context=ctext)
 
 
 # Ajax Views
@@ -86,14 +89,16 @@ def gamedata(request, gamenum=-1):
         gameobj.save()
 
         # add the cpu_move to the response and along with the status
-        response_data['status'] = 'success'
         response_data['cpu_move'] = cpu_move or -1
 
     # add game data to the response
     response_data['game'] = gameobj.id
+    response_data['gamestr'] = str(gameobj)
+    response_data['status'] = 'success'
     response_data['gameboard'] = gameobj.gameboard.game_data
     response_data['winner'] = gameobj.gameboard.winner
     response_data['stalemate'] = gameobj.gameboard.stalemate
+    response_data['moves_so_far'] = gameobj.gameboard.moves_so_far
     # add a csrf token to prevent against csrf
     response_data['csrf_token'] = str(csrf(request)['csrf_token'])
 
