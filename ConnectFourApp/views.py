@@ -6,9 +6,8 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.utils.http import is_safe_url
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.contrib.auth import REDIRECT_FIELD_NAME, login as auth_login, logout as auth_logout, authenticate
+from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
 from django.core.context_processors import csrf
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -21,10 +20,7 @@ from django import forms
 from .forms import MakeMoveForm
 
 # Alpha Connect 4
-from .alphaconnectfour import ai_simple_move
-
-# other imports
-import json
+from .alphaconnectfour import ai_simple_move, ai_advanced_move
 
 # Game Views
 
@@ -59,11 +55,13 @@ def gamedata(request, gamenum=-1):
     player = 1
     cpu_player = 2
 
+    # Ajax request of data about a game
     if request.method == 'GET':
         # get the object from the database or make a new one
         gameobj = Game.objects.filter(pk=gamenum, user=request.user).first() or make_new_game_object(request.user, 0)
         response_data['cpu_move'] = -1
 
+    # Player makes move
     if request.method == 'POST':
 
         # get and validate the csrf token and post values
@@ -90,9 +88,13 @@ def gamedata(request, gamenum=-1):
         else:
             # Hard Mode
             cpu_move = ai_simple_move(gameobj.gameboard, cpu_player)
+            #cpu_move = ai_advanced_move(gameobj.gameboard, cpu_player)
 
-        if cpu_move:
-            gameobj.gameboard.make_move(cpu_player, cpu_move)
+        if cpu_move is not None:
+            errcode = gameobj.gameboard.make_move(cpu_player, cpu_move)
+            if errcode:
+                #import pdb; pdb.set_trace()
+                pass
 
         # save the object to the database
         gameobj.gameboard.save()
@@ -164,10 +166,8 @@ class LogoutView(RedirectView):
 
 def make_new_game_object(user, difficulty):
     # Django is kinda weird about one to one relationships
-    game_board = GameBoard()
-    game_board.save()
-    game = Game(user=user, gameboard=game_board, hardmode=difficulty)
-    game.save()
+    game_board = GameBoard.objects.create()
+    game = Game.objects.create(user=user, gameboard=game_board, hardmode=difficulty)
     return game
 
 

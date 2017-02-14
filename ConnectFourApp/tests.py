@@ -1,6 +1,6 @@
 from django.test import TestCase
 from .models import GameBoard, Game
-from .alphaconnectfour import ai_simple_move
+from .alphaconnectfour import ai_simple_move, ai_advanced_move, will_give_other_player_victory, move_will_not_allow_other_player_to_force_defeat
 from django.contrib.auth.models import User
 from django.contrib.auth import REDIRECT_FIELD_NAME, login as auth_login, logout as auth_logout
 
@@ -56,6 +56,24 @@ class ViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response_data['moves_so_far'],2)
 
+
+class AiSubFunctionTests(TestCase):
+
+    def test_will_give_other_player_victory(self):
+        board = GameBoard()
+        moves = [(2,0),(1,1),(1,2),(2,4),(1,0),(1,1),(1,2),(1,4)]
+        for player, move in moves:
+            board.make_move(player, move)
+        self.assertTrue(will_give_other_player_victory(board, 2, 3))
+        self.assertFalse(will_give_other_player_victory(board, 2, 4))
+
+    def test_move_will_allow_other_player_to_force_defeat(self):
+        board = GameBoard()
+        moves = [(1,1),(1,2)]
+        for player, move in moves:
+            board.make_move(player, move)
+        self.assertTrue(move_will_not_allow_other_player_to_force_defeat(board, 2, 0))
+        self.assertFalse(move_will_not_allow_other_player_to_force_defeat(board, 2, 5))
 
 
 
