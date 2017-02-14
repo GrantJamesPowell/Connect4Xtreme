@@ -13,5 +13,7 @@
         {% endfor %}
     </ol>
 
-    <a href="{% url 'gameview' %}" class="button alt" style="align-content: center">New game</a>
+    <a href="{% url 'gameview' %}" class="button alt" style="float: left">New Normal Game</a>
+    <a href="{% url 'gameview'  %}?difficulty=1" class="button alt" style="float: right">New X-treme Game</a>
+    <br />
 {% endblock %}

@@ -135,12 +135,17 @@ class GameBoard(models.Model):
                 winning_moves.append(move)
         return winning_moves
 
+    def number_of_players_moves(self, player):
+        board = self.get_game_board()
+        return sum(sum([bool(i) for i in row if i == player]) for row in board)
+
 
 class Game(models.Model):
     user = models.ForeignKey(User)
     isusersturn = models.BooleanField(default=0)  # 0 if computer's turn 1 is user's turn
     gameboard = models.OneToOneField(GameBoard)
     starttime = models.DateField(auto_now=True)
+    hardmode = models.BooleanField(default=0)  # 0 for easy, 1 for hard
 
     @property
     def status(self):
@@ -151,6 +156,10 @@ class Game(models.Model):
         else:
             return 'Your Move'
 
+    @property
+    def level(self):
+        return ['Normal', 'X-treme'][self.hardmode]
+
     def __str__(self):
-        return 'Game Started on {} ({})'.format(self.starttime, self.status)
+        return '{} Game {} ({})'.format(self.level, self.starttime, self.status)
 

@@ -44,7 +44,7 @@ def gameview(request, game_pk=-1):
     ctext['gamesinprogress'] = Game.objects.filter(user=request.user).filter(gameboard__winner=0).count()
 
     if not ctext['game']:
-        game = make_new_game_object(request.user)
+        game = make_new_game_object(request.user, request.GET.get('difficulty',0))
         return HttpResponseRedirect('/gameview/{}'.format(game.id))
 
     return render(request, 'exts/game_view.html', context=ctext)
@@ -61,7 +61,7 @@ def gamedata(request, gamenum=-1):
 
     if request.method == 'GET':
         # get the object from the database or make a new one
-        gameobj = Game.objects.filter(pk=gamenum, user=request.user).first() or make_new_game_object(request.user)
+        gameobj = Game.objects.filter(pk=gamenum, user=request.user).first() or make_new_game_object(request.user, 0)
         response_data['cpu_move'] = -1
 
     if request.method == 'POST':
@@ -84,7 +84,13 @@ def gamedata(request, gamenum=-1):
             return JsonResponse({'status': 'error', 'error_msg': 'invalid player move'})
 
         # add cpu move to the object
-        cpu_move = ai_simple_move(gameobj.gameboard, cpu_player)
+        if gameobj.hardmode:
+            # Easy Mode
+            cpu_move = ai_simple_move(gameobj.gameboard, cpu_player)
+        else:
+            # Hard Mode
+            cpu_move = ai_simple_move(gameobj.gameboard, cpu_player)
+
         if cpu_move:
             gameobj.gameboard.make_move(cpu_player, cpu_move)
 
@@ -110,7 +116,6 @@ def gamedata(request, gamenum=-1):
 
 
 # Account Management Views
-
 
 class UserCreate(CreateView):
     model = User
@@ -157,11 +162,11 @@ class LogoutView(RedirectView):
 
 # helper functions
 
-def make_new_game_object(user):
+def make_new_game_object(user, difficulty):
     # Django is kinda weird about one to one relationships
     game_board = GameBoard()
     game_board.save()
-    game = Game(user=user, gameboard=game_board)
+    game = Game(user=user, gameboard=game_board, hardmode=difficulty)
     game.save()
     return game
 

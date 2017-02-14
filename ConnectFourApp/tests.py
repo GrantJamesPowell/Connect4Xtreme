@@ -1,13 +1,61 @@
 from django.test import TestCase
 from .models import GameBoard, Game
 from .alphaconnectfour import ai_simple_move
+from django.contrib.auth.models import User
+from django.contrib.auth import REDIRECT_FIELD_NAME, login as auth_login, logout as auth_logout
 
 import random
 
 # Create your tests here.
 
-class AjaxViewsTest(TestCase):
-    pass
+class ViewsTest(TestCase):
+    def setUp(self):
+        # Set up data for the whole TestCase
+        self.user = User.objects.create_user(username='testy', email='test@test.com', password='password')
+        self.otheruser = User.objects.create_user(username='testy2', email='test@test.com', password='password')
+        self.gameboard1 = GameBoard.objects.create()
+        self.gameboard2 = GameBoard.objects.create()
+        self.game1 = Game.objects.create(gameboard=self.gameboard1, user=self.user)
+        self.game2 = Game.objects.create(gameboard=self.gameboard2, user=self.otheruser)
+
+    def test_index_not_logged_in(self):
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 302)
+
+    def test_index_logged_in(self):
+        self.client.force_login(self.user)
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_game_view_with_pk_that_is_yours(self):
+        self.client.force_login(self.user)
+        response = self.client.get('/gameview/{}'.format(self.game1.pk))
+        self.assertEqual(response.status_code, 200)
+
+    def test_gam_view_with_pk_of_someone_elsesgame(self):
+        self.client.force_login(self.user)
+        response = self.client.get('/gameview/{}'.format(self.game2.pk))
+        self.assertEqual(response.status_code, 302)
+
+    def test_game_view_without_pk(self):
+        self.client.force_login(self.user)
+        response = self.client.get('/gameview', follow=True)
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_game_data_for_game1(self):
+        self.client.force_login(self.user)
+        response = self.client.get('/gamedata/{}'.format(self.game1.pk))
+        self.assertEqual(response.json()['status'], 'success')
+        self.assertTrue(response.json()['csrf_token'])
+
+    def test_post_move_data_for_game1(self):
+        self.client.force_login(self.user)
+        data = {'game': self.game1.pk, 'difficulty': 1, 'move':0}
+        response = self.client.post('/gamedata/{}'.format(self.game1.pk), data=data)
+        response_data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_data['moves_so_far'],2)
+
 
 
 
