@@ -58,17 +58,28 @@ def ai_advanced_move(game_board, player):
         return random.choice(other_player_winning_moves)
 
     # see what possible moves we can make from this position, looking to see if any of them will
-    # immediately let the other player will
-    possiblemoves = [move for move in game_board.available_moves
+    # immediately let the other player win
+    possible_moves = [move for move in game_board.available_moves
                      if not will_give_other_player_victory(game_board, player, move)]
 
-    # if there aren't any possible moves where we can win, just admit defeat
-    if len(possiblemoves) <= 1:
-        return random.choice(game_board.available_moves)
+    # look ahead and see if any of the possible moves will allow the opponent to force a win
+    look_ahead_2_moves = [move for move in possible_moves if
+                          move_will_not_allow_other_player_to_force_defeat(game_board, player, move)]
 
-    children = [GameBoard() for _ in possiblemoves]
-    for num,move in enumerate(possiblemoves):
-        children[num].make_move(player, move)
+    # choose one of the look ahead 2 moves, if there are any
+    if look_ahead_2_moves:
+        return random.choice(look_ahead_2_moves)
+
+    # pick from the moves that won't give victory, if there aren't any then just pick at random
+    available_moves = possible_moves if possible_moves else game_board.available_moves
+
+    # pick from the available moves with a preference for the middle
+    width = len(available_moves)
+    # normal distribution with a mu = width / 2 and a std = 1.5
+    # it is modded by the width to make sure it falls within the game board
+    move = round(random.normalvariate(width / 2, 1.5)) % width
+    return available_moves[move]
+
 
 
 

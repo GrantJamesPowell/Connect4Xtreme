@@ -87,8 +87,7 @@ def gamedata(request, gamenum=-1):
             cpu_move = ai_simple_move(gameobj.gameboard, cpu_player)
         else:
             # Hard Mode
-            cpu_move = ai_simple_move(gameobj.gameboard, cpu_player)
-            #cpu_move = ai_advanced_move(gameobj.gameboard, cpu_player)
+            cpu_move = ai_advanced_move(gameobj.gameboard, cpu_player)
 
         if cpu_move is not None:
             errcode = gameobj.gameboard.make_move(cpu_player, cpu_move)
