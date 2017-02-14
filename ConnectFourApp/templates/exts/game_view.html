@@ -3,6 +3,7 @@
 {% block headerwords%}
     <h3 id="gamestr">{{ game }}</h3>
     <p id="winstats"></p>
+    <div id="newgame"></div>
     <div id="game-base">
         <div id="game-table">
         </div>
@@ -12,6 +13,10 @@
 
 {% block boxblock %}
     <p id="moves_so_far"></p>
+    <h3>Stats for {{ request.user.first_name }}</h3>
+    <p>Games Won: {{ gameswon }} <br />
+    Games Lost: {{ gameslost }}  <br />
+    Games in Progress: {{ gamesinprogress }}</p>
 {% endblock %}
 
 {% block scriptblock %}
@@ -43,6 +48,7 @@
         gameboard = JSON.parse(gameboardjson);
         winner = data.winner;
         document.getElementById("winstats").innerHTML = ['Your Turn', 'You Won!', 'You Lost'][winner] ;
+        if (winner) {document.getElementById("newgame").innerHTML = '<br /> <a href="{% url 'gameview' %}" class="button alt">New game</a></div>'}
         cpu_move = data.cpu_move;
         stalemate = data.stalemate;
         moves_so_far = data.moves_so_far;

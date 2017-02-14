@@ -5,7 +5,7 @@ from django.views.generic import TemplateView, ListView, RedirectView, FormView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.utils.http import is_safe_url
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth import REDIRECT_FIELD_NAME, login as auth_login, logout as auth_logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
@@ -31,6 +31,7 @@ import json
 class HomePage(LoginRequiredMixin, ListView):
     template_name = 'exts/home_page.html'
     login_url = '/login/'
+    ordering = ('gameboard.winner', 'starttime' )
     def get_queryset(self):
         return Game.objects.filter(user=self.request.user).all()
 
@@ -38,6 +39,9 @@ class HomePage(LoginRequiredMixin, ListView):
 def gameview(request, game_pk=-1):
     ctext = dict()
     ctext['game'] = Game.objects.filter(user=request.user, pk=game_pk).first()
+    ctext['gameswon'] = Game.objects.filter(user=request.user).filter(gameboard__winner=1).count()
+    ctext['gameslost'] = Game.objects.filter(user=request.user).filter(gameboard__winner=2).count()
+    ctext['gamesinprogress'] = Game.objects.filter(user=request.user).filter(gameboard__winner=0).count()
 
     if not ctext['game']:
         game = make_new_game_object(request.user)
@@ -110,6 +114,7 @@ def gamedata(request, gamenum=-1):
 
 class UserCreate(CreateView):
     model = User
+    form = UserCreationForm
     fields = ('username', 'first_name', 'last_name', 'password')
     template_name = 'exts/user_create.html'
 
