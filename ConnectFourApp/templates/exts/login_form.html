@@ -1,7 +1,9 @@
 {% extends 'bases/base.html' %}
+{% load static %}
 
 {% block headerwords %}
-    <h3>Login</h3>
+    <h3>Connect 4 Xtreme</h3>
+    <image src="{% static  'assets/images/firepiece.png' %}" style="width: 80px; height: 80px"></image>
 {% endblock %}
 
 {% block boxblock %}
@@ -10,6 +12,6 @@
     <input type="submit" value="Login" />
 
     <a href="{% url 'accountcreate' %}" class="button alt" style="float: right">Create Account</a>
-    <p style="float: right; padding-right: 5px">(Don't Have an Account? For the Low Low Price of... Jk)</p>
+    <p style="float: right; padding-right: 5px">(Don't Have an Account? Create One Here!)</p>
 </form>
 {% endblock %}

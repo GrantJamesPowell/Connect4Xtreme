@@ -1,19 +1,23 @@
 {% extends 'bases/base.html' %}
+{% load static %}
+
 {% block headerwords %}
-    <h3>My Games</h3>
+    <h3>Connect 4 X-treme</h3>
+    <image src="{% static  'assets/images/firepiece.png' %}" style="width: 80px; height: 80px"></image>
+
+    <a href="{% url 'gameview' %}" class="button alt" style="float: left">New Normal Game</a>
+    <a href="{% url 'gameview'  %}?difficulty=1" class="button alt" style="float: right">New X-treme Game</a>
 {% endblock %}
 
 {% block boxblock %}
     {% if not object_list %}
         <h3>No Games Yet! Click to Get Started With Connect 4-Xtreme</h3>
     {% endif %}
+        <h4>My Games</h4>
     <ol>
         {% for game in object_list %}
         <li><a href="{% url 'gameviewpk' game_pk=game.id %}">{{ game }}</a></li>
         {% endfor %}
     </ol>
 
-    <a href="{% url 'gameview' %}" class="button alt" style="float: left">New Normal Game</a>
-    <a href="{% url 'gameview'  %}?difficulty=1" class="button alt" style="float: right">New X-treme Game</a>
-    <br />
 {% endblock %}
