@@ -13,6 +13,7 @@
         <link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
         <link rel="stylesheet" href="{% static 'assets/css/connect4app.css' %}" />
         <script src="{% static 'assets/js/jquery.min.js' %}"></script>
+        <link rel="shortcut icon" type="image/png" href="{% static 'assets/images/favicon-96x96.png' %}" />
 	</head>
 	<body>
 		<div id="page-wrapper">
@@ -20,9 +21,10 @@
 			<!-- Header -->
 			<header id="header">
 				<nav id="nav">
+
                     <ul>
                         {% if request.user.is_authenticated %}
-                        <li>Hi, {{ request.user }}!</li>
+                            <li>Hi, {{ request.user }}!</li>
                             <li><a href="{% url 'index' %}">Home</a></li>
                             <li><a href="{% url 'logout' %}">Logout</a></li>
                         {% endif %}
