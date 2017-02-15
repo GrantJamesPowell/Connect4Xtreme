@@ -1,4 +1,5 @@
 */static/
+push.bash
 db.sqlite3
 /static/*
 */static/*

@@ -92,7 +92,6 @@ def gamedata(request, gamenum=-1):
         if cpu_move is not None:
             errcode = gameobj.gameboard.make_move(cpu_player, cpu_move)
             if errcode:
-                #import pdb; pdb.set_trace()
                 pass
 
         # save the object to the database

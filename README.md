@@ -27,23 +27,23 @@ Some Creative Commons CSS templates from html5up.com are used in the front end. 
 ##  Interesting Files
 
 *AI functions:*  
-/ConnectFourApp/alphaconnectfour.py  
+`/ConnectFourApp/alphaconnectfour.py`
 Has all the computer move functions
 
 *GameBoard Objects:*  
-/ConnectFourApp/models.py  
+`/ConnectFourApp/models.py`
 Contains the `GameBoard` class which contains the game logic and database functions
 
 *Ajax endpoint*  
-/ConnectFourApp/views.py  
+`/ConnectFourApp/views.py`
 The function (gamedata) contains the ajax get and post methods  
 
 *Game Board Javascript*  
-/ConnectFourApp/templates/exts/game_view.html  
+`/ConnectFourApp/templates/exts/game_view.html`
 The front end javascript
 
 *Tests*
-/ConnectFourApp/tests.py
+`/ConnectFourApp/tests.py`
 Comprehensive unit test suite
 
 ## A little about me!
