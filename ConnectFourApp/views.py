@@ -28,6 +28,7 @@ class HomePage(LoginRequiredMixin, ListView):
     template_name = 'exts/home_page.html'
     login_url = '/login/'
     ordering = ('gameboard.winner', 'starttime' )
+
     def get_queryset(self):
         return Game.objects.filter(user=self.request.user).all()
 

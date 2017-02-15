@@ -8,7 +8,7 @@ import random
 def ai_simple_move(game_board, player):
     # looks ahead one move!
 
-    other_player = 1 if player == 2 else 2  # using the assumption there are 2 players
+    other_player = 1 if player == 2 else 2
 
     # if there are no available moves then return None
     if not game_board.available_moves:
@@ -41,7 +41,7 @@ def ai_simple_move(game_board, player):
 
 def ai_advanced_move(game_board, player):
 
-    other_player = 1 if player == 2 else 2  # using the assumption there are 2 players
+    other_player = 1 if player == 2 else 2
 
     # if there are no available moves then return None
     if not game_board.available_moves:
@@ -59,19 +59,16 @@ def ai_advanced_move(game_board, player):
 
     # see what possible moves we can make from this position, looking to see if any of them will
     # immediately let the other player win
-    possible_moves = [move for move in game_board.available_moves
-                     if not will_give_other_player_victory(game_board, player, move)]
+    look_ahead_2_moves = [move for move in game_board.available_moves
+                          if not will_give_other_player_victory(game_board, player, move)]
 
     # look ahead and see if any of the possible moves will allow the opponent to force a win
-    look_ahead_2_moves = [move for move in possible_moves if
+    look_ahead_3_moves = [move for move in look_ahead_2_moves if
                           move_will_not_allow_other_player_to_force_defeat(game_board, player, move)]
 
-    # choose one of the look ahead 2 moves, if there are any
-    if look_ahead_2_moves:
-        return random.choice(look_ahead_2_moves)
-
+    # pick from the first set of moves that had any valid moves in them
     # pick from the moves that won't give victory, if there aren't any then just pick at random
-    available_moves = possible_moves if possible_moves else game_board.available_moves
+    available_moves = look_ahead_3_moves or look_ahead_2_moves or game_board.available_moves
 
     # pick from the available moves with a preference for the middle
     width = len(available_moves)
@@ -113,3 +110,7 @@ def move_will_not_allow_other_player_to_force_defeat(gameboard, player, move):
         if not player_has_winning_move and opponent_has_two_winning_moves:
             return False
     return True
+
+
+def deep_analyze(gameboard, player, move_list):
+    pass
