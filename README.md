@@ -10,12 +10,12 @@ Create a web application in the language/framework of your choice that plays the
 
 ## What is the difference between "Normal" mode and "X-Treme"?
 
-Normal mode AI can only see one move ahead and tends to only block and play random numbers
-X-Treme mode can see much farther ahead and I have yet to be able to beat it
+Normal mode AI can only see one move ahead and tends to only block and play random numbers  
+X-Treme mode can see much farther ahead and I have yet to be able to beat it (Good Luck!)
 
 ## Why do I need to make an account?
 
-The app saves all your games to a database, so that you can login from anywhere and continue your games
+The app saves all your games to the database. You can login from anywhere and continue your games
 
 ## What outside libraries are used?
 
@@ -24,11 +24,19 @@ All of the logic and web app parts come from the Python 3 standard library and D
 The front end uses some Creative Commons CSS templates from [html5up.com](html5up.com). Some of the css styling
 (but not functionality) was inspired by this code-pen example https://codepen.io/coderontheroad/pen/GdxEo
 
+## Does it support mobile?
+
+The app currently does not support mobile
+
+## How do I know that the app is working?
+
+The app comes with a test suite, it can be run from the commandline with the `python manage.py test` command
+
 ##  Interesting Files
 
 *AI functions:*  
 `/ConnectFourApp/alphaconnectfour.py`
-Has all the computer move functions
+Has all the computer AI move functions
 
 *GameBoard Objects:*  
 `/ConnectFourApp/models.py`
