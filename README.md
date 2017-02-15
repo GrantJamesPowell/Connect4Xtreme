@@ -21,7 +21,7 @@ The app saves all your games to a database, so that you can login from anywhere 
 
 All of the logic and web app parts come from the Python 3 standard library and Django Framework
 
-Some Creative Commons CSS templates from html5up.com are used in the front end. Some of the styling css styling
+The front end uses some Creative Commons CSS templates from [html5up.com](html5up.com). Some of the css styling
 (but not functionality) was inspired by this code-pen example https://codepen.io/coderontheroad/pen/GdxEo
 
 ##  Interesting Files
