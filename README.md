@@ -8,6 +8,22 @@ A Django Implementation of the kids game 'Connect Four'
 
 Create a web application in the language/framework of your choice that plays the game "Connect Four” interactively (Human vs Computer). 
 
+## What is the difference between "Normal" mode and "X-Treme"?
+
+Normal mode AI can only see one move ahead and tends to only block and play random numbers
+X-Treme mode can see much farther ahead and I have yet to be able to beat it
+
+## Why do I need to make an account?
+
+The app saves all your games to a database, so that you can login from anywhere and continue your games
+
+## What outside libraries are used?
+
+All of the logic and web app parts come from the Python 3 standard library and Django Framework
+
+Some Creative Commons CSS templates from html5up.com are used in the front end. Some of the styling css styling
+(but not functionality) was inspired by this code-pen example https://codepen.io/coderontheroad/pen/GdxEo
+
 ##  Interesting Files
 
 *AI functions:*  
@@ -24,7 +40,11 @@ The function (gamedata) contains the ajax get and post methods
 
 *Game Board Javascript*  
 /ConnectFourApp/templates/exts/game_view.html  
-The front end javascript  
+The front end javascript
+
+*Tests*
+/ConnectFourApp/tests.py
+Comprehensive unit test suite
 
 ## A little about me!
 
