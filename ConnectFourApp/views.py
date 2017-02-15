@@ -83,11 +83,12 @@ def gamedata(request, gamenum=-1):
 
         # add cpu move to the object
         if gameobj.hardmode:
-            # Easy Mode
-            cpu_move = ai_simple_move(gameobj.gameboard, cpu_player)
-        else:
             # Hard Mode
             cpu_move = ai_advanced_move(gameobj.gameboard, cpu_player)
+
+        else:
+            # Easy Mode
+            cpu_move = ai_simple_move(gameobj.gameboard, cpu_player)
 
         if cpu_move is not None:
             errcode = gameobj.gameboard.make_move(cpu_player, cpu_move)
