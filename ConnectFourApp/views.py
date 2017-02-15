@@ -6,7 +6,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.utils.http import is_safe_url
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.core.context_processors import csrf
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -120,10 +120,9 @@ def gamedata(request, gamenum=-1):
 # Account Management Views
 
 class UserCreate(CreateView):
-    model = User
-    form = UserCreationForm
-    fields = ('username', 'first_name', 'last_name', 'password')
+    form_class = UserCreationForm
     template_name = 'exts/user_create.html'
+    success_url = '/'
 
     def get_success_url(self):
         # login the person
@@ -131,11 +130,6 @@ class UserCreate(CreateView):
         auth_login(self.request, self.object)
         # now return the success url
         return '/'
-
-    def get_form(self, form_class=None):
-        form = super(CreateView, self).get_form(form_class)
-        form.fields['password'].widget = forms.PasswordInput()
-        return form
 
 
 class LoginView(FormView):
