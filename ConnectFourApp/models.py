@@ -149,6 +149,12 @@ class GameBoard(models.Model):
     def GameObj(self):
         return Game.objects.filter(gameboard=self).first()
 
+    def __str__(self):
+        person = self.GameObj.user.username
+        hard = ['Normal', 'Xtreme'][self.GameObj.hardmode]
+        status = ['In Progress', 'Won', 'Lost'][self.winner]
+        return '{} - {} Game ({})'.format(person, hard, status)
+
 
 class Game(models.Model):
     user = models.ForeignKey(User)
