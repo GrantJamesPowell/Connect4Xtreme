@@ -103,7 +103,7 @@ def move_will_not_allow_other_player_to_force_defeat(gameboard, player, move):
     # opponent to have two ways to win if they give us a way to win on the next turn, else we don't want them to have
     # two ways to win)
     for move in inital_move_board.available_moves:
-        opponent_move_board = GameBoard.objects.create(game_data=inital_move_board.game_data)
+        opponent_move_board = GameBoard(game_data=inital_move_board.game_data)
         opponent_move_board.make_move(other_player, move)
         player_has_winning_move = opponent_move_board.get_winning_moves(player)
         opponent_has_two_winning_moves = len(opponent_move_board.get_winning_moves(other_player)) >= 2
