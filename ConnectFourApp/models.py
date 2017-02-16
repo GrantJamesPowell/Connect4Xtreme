@@ -21,6 +21,7 @@ empty_board = [[0] * width for _ in range(depth)]
 
 class GameBoard(models.Model):
     game_data = models.CharField(max_length=140, default=json.dumps(empty_board))
+    moves_data = models.CharField(max_length=40, default='')
     # if you increase the game board, you would need a larger max_length of game_data
     winner = models.IntegerField(default=0)
 
@@ -46,8 +47,13 @@ class GameBoard(models.Model):
             if not board[i][slot]:  # this means that that slot has a 0 in it (i.e. is unused)
                 board[i][slot] = player  # mark the lowest open row of the column with the player number
                 break
+        self.moves_data += str(slot)
         self.__set_game_board(board)  # set the game board property of the object
         self.winner = self.find_winner(board)  # set the winner if there is one
+
+    @property
+    def moves_list(self):
+        return self.moves_data
 
     @property
     def moves_so_far(self):
@@ -138,6 +144,10 @@ class GameBoard(models.Model):
     def number_of_players_moves(self, player):
         board = self.get_game_board()
         return sum(sum([bool(i) for i in row if i == player]) for row in board)
+
+    @property
+    def GameObj(self):
+        return Game.objects.filter(gameboard=self).first()
 
 
 class Game(models.Model):
