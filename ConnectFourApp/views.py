@@ -1,22 +1,19 @@
 # Django View Functions
 from django.shortcuts import render, HttpResponse, HttpResponseRedirect
 from django.http import JsonResponse
-from django.views.generic import TemplateView, ListView, RedirectView, FormView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.core.urlresolvers import reverse_lazy, reverse
+from django.views.generic import ListView, RedirectView, FormView
+from django.views.generic.edit import CreateView
 from django.utils.http import is_safe_url
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate
+from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.core.context_processors import csrf
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 # models
-from django.contrib.auth.models import User
 from .models import Game, GameBoard
 
 # forms
-from django import forms
 from .forms import MakeMoveForm
 
 # Alpha Connect 4
@@ -31,6 +28,7 @@ class HomePage(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Game.objects.filter(user=self.request.user).all()
+
 
 @login_required(login_url='/login/')
 def gameview(request, game_pk=-1):

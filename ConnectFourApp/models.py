@@ -22,7 +22,6 @@ empty_board = [[0] * width for _ in range(depth)]
 class GameBoard(models.Model):
     game_data = models.CharField(max_length=140, default=json.dumps(empty_board))
     moves_data = models.CharField(max_length=40, default='')
-    # if you increase the game board, you would need a larger max_length of game_data
     winner = models.IntegerField(default=0)
 
     #static Properties
@@ -149,16 +148,51 @@ class GameBoard(models.Model):
     def GameObj(self):
         return Game.objects.filter(gameboard=self).first()
 
+    def iter_row_groups(self, board=None):
+        board = board or self.get_game_board()
+        for row in board:
+            for pos in range(width + 1 - needed_to_win):
+                yield row[pos: pos + needed_to_win]
+
+    def iter_col_groups(self, board=None):
+        board = board or self.get_game_board()
+        for col in range(width):
+            for pos in range(depth + 1 - needed_to_win):
+                group = [board[i][col] for i in range(pos, pos + needed_to_win)]
+                yield group
+
+    def iter_right_diagonal_groups(self, board=None):
+        board = board or self.get_game_board()
+        for row in range(depth + 1 - needed_to_win):
+            for col in range(width + 1 - needed_to_win):
+                group = [board[row + offset][col + offset] for offset in range(needed_to_win)]  # iterate diagonally
+                yield group
+
+    def iter_left_diagonal_groups(self, board=None):
+        board = board or self.get_game_board()
+        for row in range(depth + 1 - needed_to_win):
+            for col in range(width - 1, needed_to_win - 2, -1):
+                group = [board[row + offset][col - offset] for offset in range(needed_to_win)]
+                yield group
+
+    def iter_all_groups(self):
+        board = self.get_game_board()
+        yield from self.iter_row_groups(board=board)
+        yield from self.iter_col_groups(board=board)
+        yield from self.iter_right_diagonal_groups(board=board)
+        yield from self.iter_left_diagonal_groups(board=board)
+
     def __str__(self):
-        person = self.GameObj.user.username
-        hard = ['Normal', 'Xtreme'][self.GameObj.hardmode]
+        game_obj = self.GameObj
+        person = game_obj.user.username if game_obj else 'No Player'
+        hard = ['Normal', 'Xtreme', 'No Game Type'][game_obj.hardmode if game_obj else 2]
         status = ['In Progress', 'Won', 'Lost'][self.winner]
         return '{} - {} Game ({})'.format(person, hard, status)
 
 
 class Game(models.Model):
     user = models.ForeignKey(User)
-    isusersturn = models.BooleanField(default=0)  # 0 if computer's turn 1 is user's turn
+    isusersturn = models.BooleanField(default=0)  # 0 if computer's turn 1 is user's turn //TODO: turn this into start move
     gameboard = models.OneToOneField(GameBoard)
     starttime = models.DateField(auto_now=True)
     hardmode = models.BooleanField(default=0)  # 0 for easy, 1 for hard
