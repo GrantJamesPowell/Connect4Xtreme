@@ -49,7 +49,6 @@
         gameboardjson = data.gameboard;
         gameboard = JSON.parse(gameboardjson);
         winner = data.winner;
-        //if (winner) {document.getElementById("newgame").innerHTML = '<br /> <a href="{% url 'gameview' %}" class="button alt">New Game</a></div>'}
         cpu_move = data.cpu_move;
         stalemate = data.stalemate;
         moves_so_far = data.moves_so_far;
@@ -115,9 +114,6 @@
         $.post('/gamedata',data, function(data){setvals(data)})
     }
 
-    function parse_post_response(data) {
-
-    }
 
     function possibleColumns(){
       var moves_array = new Array();

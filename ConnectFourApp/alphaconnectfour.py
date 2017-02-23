@@ -66,7 +66,14 @@ def ai_advanced_move(game_board, player):
     look_ahead_3_moves = [move for move in look_ahead_2_moves if
                           move_will_not_allow_other_player_to_force_defeat(game_board, player, move)]
 
-    # pick from the first set of moves that had any valid moves in them
+    # Analyze the moves returned from look 3 moves ahead and pick the one that has the highest amount of "groups"
+    # That can possibly lead to a connect 4, also subtracting points if the other player has opportunities
+    if look_ahead_3_moves:
+        best_move = max(look_ahead_3_moves, key=lambda move: board_score(game_board, player, move))
+        if best_move:
+            return best_move
+
+    # we couldn't get a best move so pick from the first set of moves that had any valid moves in them
     # pick from the moves that won't give victory, if there aren't any then just pick at random
     available_moves = look_ahead_3_moves or look_ahead_2_moves or game_board.available_moves
 
@@ -112,5 +119,29 @@ def move_will_not_allow_other_player_to_force_defeat(gameboard, player, move):
     return True
 
 
-def deep_analyze(gameboard, player, move_list):
-    pass
+
+def board_score(game_board, player, move):
+    other_player = 1 if player == 2 else 2
+    test_board = GameBoard(game_data=game_board.game_data)
+    test_board.make_move(player, move)
+
+    score = 0
+    for group in test_board.iter_all_groups():
+        group_without_zeros = [pos for pos in group if pos != 0]
+        # if the entire group is zeros, then we don't need to check it
+        if not group_without_zeros:
+            continue
+        # if there are more than one player in this group it can't be a connect 4 so don't add it to the score
+        if len(set(group_without_zeros)) >= 2:
+            continue
+        # if the moves are all for the player, add them to the score as a positive
+        if group_without_zeros[0] == player:
+            score += len(group_without_zeros)
+        # if the moves are for the other player then subtract them from the board score
+        elif group_without_zeros[0] == other_player:
+            score -= len(group_without_zeros)
+
+    # prefer moves closer to the middle by giving them a slightly higher score
+    adjustment = abs((test_board.width - 1) - move) * .01
+
+    return score + adjustment
