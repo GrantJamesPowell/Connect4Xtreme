@@ -32,9 +32,8 @@
     board.innerHTML += '<div id="dhuman' + '" class="disc ' + 'red' + '" style=""' + '></div>';
 
 
-
     $(document).ready(function(){
-        $.get('/gamedata/{{ game.id }}', function(data){setvals(data)}); // set this to game value
+        $.get('/gamedata/{{ game.id }}', function(data){setvals(data)});
     });
 
     function setvals(data){
