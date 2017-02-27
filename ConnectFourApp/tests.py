@@ -2,13 +2,14 @@ from django.test import TestCase
 from .models import GameBoard, Game
 from .alphaconnectfour import ai_simple_move, ai_advanced_move, will_give_other_player_victory, move_will_not_allow_other_player_to_force_defeat
 from django.contrib.auth.models import User
-from django.contrib.auth import REDIRECT_FIELD_NAME, login as auth_login, logout as auth_logout
 
 import random
 
 # Create your tests here.
 
+
 class ViewsTest(TestCase):
+
     def setUp(self):
         # Set up data for the whole TestCase
         self.user = User.objects.create_user(username='testy', email='test@test.com', password='password')
@@ -50,18 +51,18 @@ class ViewsTest(TestCase):
 
     def test_post_move_data_for_game1(self):
         self.client.force_login(self.user)
-        data = {'game': self.game1.pk, 'difficulty': 1, 'move':0}
+        data = {'game': self.game1.pk, 'difficulty': 1, 'move': 0}
         response = self.client.post('/gamedata/{}'.format(self.game1.pk), data=data)
         response_data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response_data['moves_so_far'],2)
+        self.assertEqual(response_data['moves_so_far'], 2)
 
 
 class AiSubFunctionTests(TestCase):
 
     def test_will_give_other_player_victory(self):
         board = GameBoard()
-        moves = [(2,0),(1,1),(1,2),(2,4),(1,0),(1,1),(1,2),(1,4)]
+        moves = [(2, 0), (1, 1), (1, 2), (2, 4), (1, 0), (1, 1), (1, 2), (1, 4)]
         for player, move in moves:
             board.make_move(player, move)
         self.assertTrue(will_give_other_player_victory(board, 2, 3))
@@ -69,12 +70,11 @@ class AiSubFunctionTests(TestCase):
 
     def test_move_will_allow_other_player_to_force_defeat(self):
         board = GameBoard()
-        moves = [(1,1),(1,2)]
+        moves = [(1, 1), (1, 2)]
         for player, move in moves:
             board.make_move(player, move)
         self.assertTrue(move_will_not_allow_other_player_to_force_defeat(board, 2, 0))
         self.assertFalse(move_will_not_allow_other_player_to_force_defeat(board, 2, 5))
-
 
 
 class AlphaConnectFourSimpleAiTests(TestCase):
@@ -119,10 +119,10 @@ class AlphaConnectFourSimpleAiTests(TestCase):
                     board.make_move(players[turn], move)
                     turn = not turn
 
-
         print()
         print('Simple Ai Game Example')
-        for row in board.get_game_board(): print(row)
+        for row in board.get_game_board():
+            print(row)
         print()
 
 
@@ -161,13 +161,12 @@ class AlphaConnectFourAdvancedAiTests(TestCase):
         for _ in range(5):
             board = GameBoard()
             turn = 0
-            players = (1,2)
+            players = (1, 2)
             while not board.winner and not board.stalemate:
                 move = ai_advanced_move(board, players[turn])
                 if move is not None:
                     board.make_move(players[turn], move)
                     turn = not turn
-
 
         print()
         print('Advanced Ai Game Example')
@@ -175,14 +174,13 @@ class AlphaConnectFourAdvancedAiTests(TestCase):
         print()
 
 
-
 class GameBoardTests(TestCase):
 
     def test_invalid_move(self):
         board = GameBoard()
-        moves = (0,0,0,0,0,0)  # Fill a Column
+        moves = (0, 0, 0, 0, 0, 0)  # Fill a Column
         turn = 1
-        players = (1,2)
+        players = (1, 2)
         for move in moves:
             error = board.make_move(players[turn], move)
             turn = not turn
@@ -193,7 +191,7 @@ class GameBoardTests(TestCase):
 
     def test_make_move_on_finished_game(self):
         board = GameBoard()
-        moves = (0,0,0,0)  # Win a game
+        moves = (0, 0, 0, 0)  # Win a game
         player = 1
         for move in moves:
             board.make_move(player, move)
@@ -202,8 +200,8 @@ class GameBoardTests(TestCase):
 
     def test_stalemate(self):
         board = GameBoard()
-        evens = (0,2,4,6)
-        odds = (1,3,5)
+        evens = (0, 2, 4, 6)
+        odds = (1, 3, 5)
         for _ in range(3):
             for move in evens:
                 board.make_move(1, move)
@@ -219,7 +217,7 @@ class GameBoardTests(TestCase):
     def test_horizontal_victory(self):
         board = GameBoard()
         player = 1
-        moves = (0,1,2,3)
+        moves = (0, 1, 2, 3)
         for move in moves:
             board.make_move(player, move)
         self.assertEqual(player, board.winner)
@@ -227,15 +225,15 @@ class GameBoardTests(TestCase):
     def test_vertical_victory(self):
         board = GameBoard()
         player = 1
-        moves = (0,0,0,0)
+        moves = (0, 0, 0, 0)
         for move in moves:
             board.make_move(player, move)
         self.assertEqual(player, board.winner)
 
     def test_right_diagonal_win(self):
         board = GameBoard()
-        p2moves = (0,0,0,1,1,2)  # make a little triangle to put the winning diagonal on
-        p1moves = (0,1,2,3)
+        p2moves = (0, 0, 0, 1, 1, 2)  # make a little triangle to put the winning diagonal on
+        p1moves = (0, 1, 2, 3)
         for move in p2moves:
             board.make_move(2, move)
         for move in p1moves:
@@ -244,8 +242,8 @@ class GameBoardTests(TestCase):
 
     def test_left_diagonal_win(self):
         board = GameBoard()
-        p2moves = (3,3,3,2,2,1)
-        p1moves = (3,2,1,0)
+        p2moves = (3, 3, 3, 2, 2, 1)
+        p1moves = (3, 2, 1, 0)
         for move in p2moves:
             board.make_move(2, move)
         for move in p1moves:
@@ -254,7 +252,7 @@ class GameBoardTests(TestCase):
 
     def test_winning_moves_horizontal(self):
         board = GameBoard()
-        moves = (0,1,2)
+        moves = (0, 1, 2)
         for move in moves:
             board.make_move(1, move)
         winning_moves = board.get_winning_moves(1)
@@ -262,7 +260,7 @@ class GameBoardTests(TestCase):
 
     def test_winning_moves_vertical(self):
         board = GameBoard()
-        moves = (0,0,0)
+        moves = (0, 0, 0)
         for move in moves:
             board.make_move(1, move)
         winning_moves = board.get_winning_moves(1)
@@ -270,13 +268,11 @@ class GameBoardTests(TestCase):
 
     def test_winning_moves_diagonal(self):
         board =GameBoard()
-        p2moves = (0,0,0,1,1,2)  # make a little triangle to put the winning diagonal on
-        p1moves = (0,1,2)
+        p2moves = (0, 0, 0, 1, 1, 2)  # make a little triangle to put the winning diagonal on
+        p1moves = (0, 1, 2)
         for move in p2moves:
             board.make_move(2, move)
         for move in p1moves:
             board.make_move(1, move)
         winning_moves = board.get_winning_moves(2)
         self.assertTrue(3 in winning_moves)
-
-

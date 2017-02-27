@@ -25,10 +25,10 @@
     <script>
 
     var game, csrf_token, gameboardjson, gameboard, winner, cpu_move, stalemate, gamestr, moves_so_far;
-    var initaldata;
+    var initaldata, currentCol;
     var id = 1;
     var board = document.getElementById("game-table");
-    var difficulty = 1
+    var difficulty = 1;
     board.innerHTML += '<div id="dhuman' + '" class="disc ' + 'red' + '" style=""' + '></div>';
 
 
@@ -60,8 +60,7 @@
 
     function render_game_board(gameboard){
         // Take the existing game board and put it on the field
-        console.log('Rendering Game Board');
-        board.innerHTML = ""
+        board.innerHTML = "";
         if (!winner) {
             board.innerHTML += '<div id="dhuman' + '" class="disc ' + 'red' + '" style=""' + '></div>';
         }
@@ -69,9 +68,7 @@
             for (col=6; col >= 0; col--) {
                 player = this.gameboard[row][col];
                 if (player){
-                    console.log('adding row' + row + ' col ' + col + ' for ' + player);
                     piece = make_game_piece_div(player, row, col);
-                    console.log(piece)
                 }
             }
         }
@@ -81,8 +78,8 @@
         var color = player == 1 ? 'red' : 'yellow';
         var newpeice= '<div id="d' + id + '" class="disc ' + color + '" style=""' + '></div>';
         board.innerHTML += newpeice;
-         document.getElementById('d'+id).style.top = (14+row*60)+'px';
-         document.getElementById('d'+id).style.left = (14+60*col)+"px";
+         document.getElementById('d'+id).style.top = get_row_px(row)+'px';
+         document.getElementById('d'+id).style.left = get_col_px(col)+"px";
         id += 1;
     };
 
@@ -91,7 +88,7 @@
             currentCol = Math.floor((evt.clientX - board.offsetLeft)/60);
             if(currentCol<0){currentCol=0;}
             if(currentCol>6){currentCol=6;}
-            document.getElementById('dhuman').style.left = (14+60*currentCol)+"px";
+            document.getElementById('dhuman').style.left = get_col_px(currentCol)+"px";
             document.getElementById('dhuman').style.top = "-55px";
         } else {
             if (document.contains(document.getElementById("dhuman"))) {
@@ -128,9 +125,27 @@
     document.onclick = function(evt){
       if(possibleColumns().indexOf(currentCol) != -1){
           post_player_move(currentCol)
-        console.log('player dropped at' + currentCol);
       }
     };
+
+    function bottom_most_row_available(col) {
+        if (board[0][col] != 0) {
+            return -1;  // column is full is full
+        }
+        currow = board.length;
+        while (board[currow][col] != 0 && currow > 0){
+            currow--;
+        }
+        return currow
+    }
+
+    function get_row_px(row){
+        return 14+row*60
+    }
+
+    function get_col_px(col){
+        return 14+60*col
+    }
 
     </script>
         {% endblock %}

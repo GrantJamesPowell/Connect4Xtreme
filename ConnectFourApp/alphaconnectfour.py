@@ -5,8 +5,9 @@ __author__ = 'grantpowell'
 from .models import GameBoard
 import random
 
+
 def ai_simple_move(game_board, player):
-    # looks ahead one move!
+    # looks ahead two moves!
 
     other_player = 1 if player == 2 else 2
 
@@ -26,10 +27,10 @@ def ai_simple_move(game_board, player):
 
     # get the moves that won't give the opponent a victory
     possible_moves = [move for move in game_board.available_moves
-                     if not will_give_other_player_victory(game_board, player, move)]
+                      if not will_give_other_player_victory(game_board, player, move)]
 
     # pick from the moves that won't give victory, if there aren't any then just pick at random
-    available_moves = possible_moves if possible_moves else game_board.available_moves
+    available_moves = possible_moves or game_board.available_moves
 
     # pick from the available moves with a preference for the middle
     width = len(available_moves)
@@ -68,12 +69,13 @@ def ai_advanced_move(game_board, player):
 
     # Analyze the moves returned from look 3 moves ahead and pick the one that has the highest amount of "groups"
     # That can possibly lead to a connect 4, also subtracting points if the other player has opportunities
+    # more details available in the board_score function
     if look_ahead_3_moves:
-        best_move = max(look_ahead_3_moves, key=lambda move: board_score(game_board, player, move))
+        best_move = max(look_ahead_3_moves, key=lambda mv: board_score(game_board, player, mv))
         if best_move:
             return best_move
 
-    # we couldn't get a best move so pick from the first set of moves that had any valid moves in them
+    # we couldn't get a best move, so pick from the first set of moves that had any valid moves in them
     # pick from the moves that won't give victory, if there aren't any then just pick at random
     available_moves = look_ahead_3_moves or look_ahead_2_moves or game_board.available_moves
 
@@ -83,9 +85,6 @@ def ai_advanced_move(game_board, player):
     # it is modded by the width to make sure it falls within the game board
     move = round(random.normalvariate(width / 2, 1.5)) % width
     return available_moves[move]
-
-
-
 
 
 def will_give_other_player_victory(gameboard, player, move):
@@ -117,7 +116,6 @@ def move_will_not_allow_other_player_to_force_defeat(gameboard, player, move):
         if not player_has_winning_move and opponent_has_two_winning_moves:
             return False
     return True
-
 
 
 def board_score(game_board, player, move):

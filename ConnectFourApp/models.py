@@ -20,6 +20,8 @@ empty_board = [[0] * width for _ in range(depth)]
 
 
 class GameBoard(models.Model):
+    # these are the actual database components of the objects, they are what django populates and saves
+    # to GameBoard class objects
     game_data = models.CharField(max_length=140, default=json.dumps(empty_board))
     moves_data = models.CharField(max_length=40, default='')
     winner = models.IntegerField(default=0)
@@ -192,7 +194,7 @@ class GameBoard(models.Model):
 
 class Game(models.Model):
     user = models.ForeignKey(User)
-    isusersturn = models.BooleanField(default=0)  # 0 if computer's turn 1 is user's turn //TODO: turn this into start move
+    isusersturn = models.BooleanField(default=0)  # 0 if computer's turn 1 is user's turn
     gameboard = models.OneToOneField(GameBoard)
     starttime = models.DateField(auto_now=True)
     hardmode = models.BooleanField(default=0)  # 0 for easy, 1 for hard
