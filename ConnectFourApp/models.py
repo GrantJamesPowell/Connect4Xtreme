@@ -20,7 +20,6 @@ class GameBoard(models.Model):
     width = 7
     depth = 6
     needed_to_win = 4
-    meta_data_class = Game
 
     def get_empty_board(self):
         return [[0] * self.width for _ in range(self.depth)]
@@ -149,7 +148,7 @@ class GameBoard(models.Model):
 
     @property
     def GameObj(self):
-        return self.meta_data_class.objects.filter(gameboard=self).first()
+        return self.Game.objects.filter(gameboard=self).first()
 
     def iter_row_groups(self, board=None):
         board = board or self.get_game_board()
