@@ -3,10 +3,6 @@ from django.contrib.auth.models import User
 import json
 
 # Create your models here.
-width = 7
-depth = 6
-needed_to_win = 4
-empty_board = [[0] * width for _ in range(depth)]
 
 # empty_board
 # [[0, 0, 0, 0, 0, 0, 0],
@@ -20,21 +16,27 @@ empty_board = [[0] * width for _ in range(depth)]
 
 
 class GameBoard(models.Model):
+    #static Properties
+    width = 7
+    depth = 6
+    needed_to_win = 4
+    meta_data_class = Game
+
+    def get_empty_board(self):
+        return [[0] * self.width for _ in range(self.depth)]
+
     # these are the actual database components of the objects, they are what django populates and saves
     # to GameBoard class objects
-    game_data = models.CharField(max_length=140, default=json.dumps(empty_board))
+    game_data = models.CharField(max_length=140, default='')
     moves_data = models.CharField(max_length=40, default='')
     winner = models.IntegerField(default=0)
 
-    #static Properties
-    width = width
-    depth = depth
-    needed_to_win = needed_to_win
-
     def get_game_board(self):
+        if not self.game_data:
+            self.game_data = json.dumps(self.get_empty_board())
         return json.loads(self.game_data)
 
-    def __set_game_board(self, board):
+    def _set_game_board(self, board):
         self.game_data = json.dumps(board)
 
     def make_move(self, player, slot):
@@ -44,12 +46,12 @@ class GameBoard(models.Model):
         board = self.get_game_board()
         if board[0][slot]:  # This means that that slot was full, so this is an error
             return 1  # Error
-        for i in reversed(range(depth)):
+        for i in reversed(range(self.depth)):
             if not board[i][slot]:  # this means that that slot has a 0 in it (i.e. is unused)
                 board[i][slot] = player  # mark the lowest open row of the column with the player number
                 break
         self.moves_data += str(slot)
-        self.__set_game_board(board)  # set the game board property of the object
+        self._set_game_board(board)  # set the game board property of the object
         self.winner = self.find_winner(board)  # set the winner if there is one
 
     @property
@@ -71,16 +73,15 @@ class GameBoard(models.Model):
     def available_moves(self):
         board = self.get_game_board()
         toprow = board[0]
-        return [i for i in range(width) if toprow[i] == 0]  # return a list of the indexes that are empty
+        return [i for i in range(self.width) if toprow[i] == 0]  # return a list of the indexes that are empty
 
-    @staticmethod
-    def find_winner(board):
+    def find_winner(self, board):
 
         # check columns for winner
-        for col in range(width):  # iterate through the columns
+        for col in range(self.width):  # iterate through the columns
             # iterate through the starting depths, if there is a max depth of 6 that means we only have to check
             # starting at depth 0, 1, 2 because at depth 3 there wouldn't be enough to have a connect 4
-            for pos in range(depth + 1 - needed_to_win):  # you need plus one because range is weird
+            for pos in range(self.depth + 1 - self.needed_to_win):  # you need plus one because range is weird
                 # then we check if the first position is a zero, if it is that means that it can't be a connect four
                 # beacuse there is an empty spot, this is to take care of the case where all 4 of positions
                 # we are checking are the same but empty
@@ -88,7 +89,7 @@ class GameBoard(models.Model):
                     # The hash set adds values to itself for every unique value, if at the end there was only one
                     # unique value, that means that all the elements were the same, which
                     # means that there was a winner
-                    group = [board[i][col] for i in range(pos, pos + needed_to_win)]
+                    group = [board[i][col] for i in range(pos, pos + self.needed_to_win)]
                     uniquevals = set(group)
                     if len(uniquevals) == 1:
                         # return the unique element which is equal to the player number
@@ -99,30 +100,30 @@ class GameBoard(models.Model):
             # iterate through the row for every start position with enough length remaining to have a winner.
             # For a 7 width game we would only need to look at positions 0,1,2,3 because position 4 would only
             # have 3 slots left in the row, so it couldn't have a connect 4
-            for pos in range(width + 1 - needed_to_win):
+            for pos in range(self.width + 1 - self.needed_to_win):
                 # check to make sure that the first spot isn't empty, if they were all the same but empty, we wouldn't
                 # have a want to return 0 as the winner
                 if row[pos] != 0:
                     # check to see that the number of unique entries is equal to one
-                    if len(set(row[pos: pos + needed_to_win])) == 1:
+                    if len(set(row[pos: pos + self.needed_to_win])) == 1:
                         # return the first entry, equal to the player number
                         return row[pos]
 
         # check right diagonals for a winner (diagonal where the lowest piece is the farthest right)
-        for row in range(depth + 1 - needed_to_win):
-            for col in range(width + 1 - needed_to_win):
+        for row in range(self.depth + 1 - self.needed_to_win):
+            for col in range(self.width + 1 - self.needed_to_win):
                 if board[row][col] != 0:  # check to make sure the first value isn't empty
-                    group = [board[row + offset][col + offset] for offset in range(needed_to_win)]  # iterate diagonally
+                    group = [board[row + offset][col + offset] for offset in range(self.needed_to_win)]  # iterate diagonally
                     uniquevals = set(group)
                     if len(uniquevals) == 1:  # there was only one unique value in the group
                         return board[row][col]  # return the unique value
 
 
         # check left diagonals for a winner (diagonal where the lowest piece is the farthest left)
-        for row in range(depth + 1 - needed_to_win):
-            for col in range(width - 1, needed_to_win - 2, -1):
+        for row in range(self.depth + 1 - self.needed_to_win):
+            for col in range(self.width - 1, self.needed_to_win - 2, -1):
                 if board[row][col] != 0:
-                    group = [board[row + offset][col - offset] for offset in range(needed_to_win)]
+                    group = [board[row + offset][col - offset] for offset in range(self.needed_to_win)]
                     uniquevals = set(group)
                     if len(uniquevals) == 1:
                         return board[row][col]
@@ -133,7 +134,7 @@ class GameBoard(models.Model):
     def get_winning_moves(self, player):
         winning_moves = []
         # try all the moves in a width
-        for move in range(width):
+        for move in range(self.width):
             # make a "testboard" based on the current board
             testboard = GameBoard()
             testboard.game_data = self.game_data
@@ -148,33 +149,33 @@ class GameBoard(models.Model):
 
     @property
     def GameObj(self):
-        return Game.objects.filter(gameboard=self).first()
+        return self.meta_data_class.objects.filter(gameboard=self).first()
 
     def iter_row_groups(self, board=None):
         board = board or self.get_game_board()
         for row in board:
-            for pos in range(width + 1 - needed_to_win):
-                yield row[pos: pos + needed_to_win]
+            for pos in range(self.width + 1 - self.needed_to_win):
+                yield row[pos: pos + self.needed_to_win]
 
     def iter_col_groups(self, board=None):
         board = board or self.get_game_board()
-        for col in range(width):
-            for pos in range(depth + 1 - needed_to_win):
-                group = [board[i][col] for i in range(pos, pos + needed_to_win)]
+        for col in range(self.width):
+            for pos in range(self.depth + 1 - self.needed_to_win):
+                group = [board[i][col] for i in range(pos, pos + self.needed_to_win)]
                 yield group
 
     def iter_right_diagonal_groups(self, board=None):
         board = board or self.get_game_board()
-        for row in range(depth + 1 - needed_to_win):
-            for col in range(width + 1 - needed_to_win):
-                group = [board[row + offset][col + offset] for offset in range(needed_to_win)]  # iterate diagonally
+        for row in range(self.depth + 1 - self.needed_to_win):
+            for col in range(self.width + 1 - self.needed_to_win):
+                group = [board[row + offset][col + offset] for offset in range(self.needed_to_win)]  # iterate diagonally
                 yield group
 
     def iter_left_diagonal_groups(self, board=None):
         board = board or self.get_game_board()
-        for row in range(depth + 1 - needed_to_win):
-            for col in range(width - 1, needed_to_win - 2, -1):
-                group = [board[row + offset][col - offset] for offset in range(needed_to_win)]
+        for row in range(self.depth + 1 - self.needed_to_win):
+            for col in range(self.width - 1, self.needed_to_win - 2, -1):
+                group = [board[row + offset][col - offset] for offset in range(self.needed_to_win)]
                 yield group
 
     def iter_all_groups(self):
@@ -190,6 +191,34 @@ class GameBoard(models.Model):
         hard = ['Normal', 'Xtreme', 'No Game Type'][game_obj.hardmode if game_obj else 2]
         status = ['In Progress', 'Won', 'Lost'][self.winner]
         return '{} - {} Game ({})'.format(person, hard, status)
+
+
+
+
+class TicTacToeGameBoard(GameBoard):
+    # Over Ride the width, depth, and needed to win
+    width = 3
+    depth = 3
+    needed_to_win = 3
+
+    # over ride the make move method, becuase in tic tac toe, you can go at any depth
+    def make_move(self, player, row, col):
+         # error if the game is over
+        if self.winner:
+            return 1
+        board = self.get_game_board()
+        if board[row][col]:  # This means that that slot was full, so this is an error
+            return 1  # Error
+        board[row][col] = player
+        self.moves_data += str((row,col))
+        self._set_game_board(board) # set the game board property of the object
+        self.winner = self.find_winner(board)  # set the winner if there is one
+
+    @property
+    def available_moves(self):
+        board = self.get_game_board()
+        return [(row, col) for row in self.depth for col in self.width if not board[row][col]]
+
 
 
 class Game(models.Model):

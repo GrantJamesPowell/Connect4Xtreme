@@ -12,7 +12,7 @@ def availablemoves(board):
 print()
 username = input('Username:  ')
 password = getpass.getpass()
-print(chr(27) + "[2J")
+print(chr(27) + "[2J")  # the clear terminal code
 
 csrfpattern = re.compile("name='csrfmiddlewaretoken' value='(.*?)' />")
 
@@ -34,11 +34,11 @@ with requests.Session() as s:
         # display the current game board
         board = json.loads(curdata['gameboard'])
         # super ugly color the game board comprehension
-        strboard = '\n'.join([', '.join([str(i).replace('1', '\x1b[6;30;46m1\x1b[0m').replace('2', '\x1b[3;32;41m2\x1b[0m') for i in row]) for row in board])
+        str_board = '\n'.join([', '.join([str(i).replace('1', '\x1b[6;30;46m1\x1b[0m').replace('2', '\x1b[3;32;41m2\x1b[0m') for i in row]) for row in board])
         print()
         print(curdata['gamestr'])
         print()
-        print(strboard)
+        print(str_board)
         print('===================')
         print('0  1  2  3  4  5  6  ')
         print('===================')
@@ -56,6 +56,7 @@ with requests.Session() as s:
             if int(move) in availablemoves(board):
                 break
             print('invalid move')
+        # now that we have a valid move, we send that data in a post request to the server
         r = s.post(game_url, headers={'referer': game_url}, data={'move': move,
                                                                   'game': game,
                                                                   'difficulty': 0,
