@@ -4,7 +4,7 @@ A Django Implementation of the kids game 'Connect Four'
 ![Alt text](/samplepics/maingame.png?raw=true "Game Screen")
 ![Alt text](/samplepics/homescreen.png?raw=true "Home Screen")
 
-##Problem Statement: 
+## Problem Statement: 
 
 Create a web application in the language/framework of your choice that plays the game "Connect Four” interactively (Human vs Computer). 
 
